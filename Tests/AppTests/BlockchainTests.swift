@@ -52,7 +52,16 @@ final class BlockchainTests: XCTestCase {
         blockchain.addBlock(data: newData ?? Data())
         let newData2 = "third block".data(using: .utf8)
         blockchain.addBlock(data: newData2 ?? Data())
-        blockchain.chain[2].lastHash = "broken"
+
+        // Lets create a new block
+        guard let lastBlock = blockchain.chain.last else {
+            assertionFailure()
+            return
+        }
+        let changedBlock = Block(timestamp: lastBlock.timestamp, hash: lastBlock.hash, lastHash: "broken", data: lastBlock.data)
+        // Change the block in the chain
+        blockchain.chain[2] = changedBlock
+        // Validate
         XCTAssertFalse(blockchain.validateChain())
     }
 
@@ -66,7 +75,15 @@ final class BlockchainTests: XCTestCase {
         blockchain.addBlock(data: newData ?? Data())
         let newData2 = "third block".data(using: .utf8)
         blockchain.addBlock(data: newData2 ?? Data())
-        blockchain.chain[2].data = "broken".data(using: .utf8) ?? Data()
+        // Lets create a new block
+        guard let lastBlock = blockchain.chain.last else {
+            assertionFailure()
+            return
+        }
+        let changedBlock = Block(timestamp: lastBlock.timestamp, hash: lastBlock.hash, lastHash: lastBlock.lastHash, data: "broken".data(using: .utf8) ?? Data())
+        // Change the block in the chain
+        blockchain.chain[2] = changedBlock
+        // Validate
         XCTAssertFalse(blockchain.validateChain())
     }
 

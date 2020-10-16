@@ -11,8 +11,8 @@ import Crypto
 struct Block {
     let timestamp: String
     let hash: String
-    var lastHash: String
-    var data: Data
+    let lastHash: String
+    let data: Data
 
     // returns the first block for the blockchain
     static func genesis() -> Block {
