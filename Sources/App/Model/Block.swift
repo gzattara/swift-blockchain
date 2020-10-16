@@ -11,17 +11,17 @@ import Crypto
 struct Block {
     let timestamp: String
     let hash: String
-    let lastHash: String
-    let data: Data
+    var lastHash: String
+    var data: Data
 
     // returns the first block for the blockchain
     static func genesis() -> Block {
-        return Block(timestamp: String(Date().timeIntervalSince1970), hash: "----", lastHash: "", data: Data())
+        return Block(timestamp: "dumy-timestamp", hash: "----", lastHash: "", data: Data())
     }
 
     static func mine(lastBlock: Block, data: Data) -> Block {
         let timestamp = String(Date().timeIntervalSince1970)
-        return Block(timestamp: timestamp, hash: Block.generateHash(timestamp: timestamp, lastHash: lastBlock.hash, data: data), lastHash: lastBlock.hash, data: Data())
+        return Block(timestamp: timestamp, hash: Block.generateHash(timestamp: timestamp, lastHash: lastBlock.hash, data: data), lastHash: lastBlock.hash, data: data)
     }
 
     static func generateHash(timestamp: String, lastHash: String, data: Data) -> String {
@@ -29,5 +29,14 @@ struct Block {
         let hashed = SHA256.hash(data: inputData)
         let hashString = hashed.compactMap { String(format: "%02x", $0) }.joined()
         return hashString
+    }
+}
+
+extension Block: Equatable {
+    static func ==(lhs: Block, rhs: Block) -> Bool {
+        if lhs.hash == rhs.hash, lhs.lastHash == rhs.lastHash, lhs.timestamp == rhs.timestamp, lhs.data == rhs.data {
+            return true
+        }
+        return false
     }
 }
