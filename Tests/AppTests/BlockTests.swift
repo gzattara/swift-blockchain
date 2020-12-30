@@ -26,10 +26,12 @@ final class BlockTests: XCTestCase {
     }
 
     func testBlock() {
-        let block = Block(timestamp: "test", hash: "hash", lastHash: "lasthash", data: Data(), nonce: "", difficulty: 1)
+        let block = Block(timestamp: "test", hash: "hash", lastHash: "lasthash", data: Data(), nonce: 0, difficulty: 1)
         
         XCTAssertEqual(block.timestamp, "test")
         XCTAssertEqual(block.hash, "hash")
+        XCTAssertEqual(block.difficulty, 1)
+        XCTAssertEqual(block.nonce, 0)
     }
 
     func testtGenesysBlock() {
@@ -44,8 +46,8 @@ final class BlockTests: XCTestCase {
     }
 
     func testHashGeneration() {
-        let hash = Block.generateHash(timestamp: "", lastHash: "test", data: Data(), nonce: "", difficulty: 1)
-        XCTAssertEqual(hash, "9F86D081884C7D659A2FEAA0C55AD015A3BF4F1B2B0B822CD15D6C15B0F00A08".lowercased())
+        let hash = Block.generateHash(timestamp: "", lastHash: "test", data: Data(), nonce: 0, difficulty: 3)
+        XCTAssertEqual(hash, "87386d7d648dfbad544f3066446a091098d61d12760ef7787f41328abdc10709".lowercased())
     }
 
     func testMatchDifficultyCriteria() {

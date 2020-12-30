@@ -13,22 +13,42 @@ struct Block {
     let hash: String
     let lastHash: String
     let data: Data
-    let nonce: String
+    let nonce: Int
     let difficulty: Int
 
     // returns the first block for the blockchain
     static func genesis() -> Block {
-        return Block(timestamp: "dumy-timestamp", hash: "----", lastHash: "", data: Data(), nonce: "0", difficulty: 1)
+        return Block(timestamp: "dumy-timestamp", hash: "----", lastHash: "", data: Data(), nonce: 0, difficulty: 3)
     }
 
     static func mine(lastBlock: Block, data: Data) -> Block {
-        let timestamp = String(Date().timeIntervalSince1970)
-        return Block(timestamp: timestamp, hash: Block.generateHash(timestamp: timestamp, lastHash: lastBlock.hash, data: data, nonce: "", difficulty: 1), lastHash: lastBlock.hash, data: data, nonce: "", difficulty: 1)
+        var hash: String = ""
+        var timestamp: String = ""
+
+        var nonce = lastBlock.nonce
+        var hashIsValid = false
+
+        while !hashIsValid {
+            timestamp = String(Date().timeIntervalSince1970)
+            nonce += 1
+
+            hash = Block.generateHash(timestamp: timestamp, lastHash: lastBlock.hash, data: data, nonce: nonce, difficulty: lastBlock.difficulty)
+            let firstIndex = String.Index(utf16Offset: 0, in: hash)
+            let lastIndex = String.Index(utf16Offset: lastBlock.difficulty - 1, in: hash)
+            if String(hash[firstIndex...lastIndex]) == String.init(repeating: "0", count: lastBlock.difficulty) {
+                hashIsValid = true
+            }
+        }
+        return Block(timestamp: timestamp, hash: hash, lastHash: lastBlock.hash, data: data, nonce: nonce, difficulty: lastBlock.difficulty)
     }
 
-    static func generateHash(timestamp: String, lastHash: String, data: Data, nonce: String, difficulty: Int) -> String {
-//        let String.init(repeating: nonce[nonce.index(after: nonce.startIndex)], count: difficulty)
-        let inputData = Data(nonce .utf8) + Data(timestamp.utf8) + Data(lastHash.utf8) + data
+    static func generateHash(timestamp: String, lastHash: String, data: Data, nonce: Int, difficulty: Int) -> String {
+        var nonceVar = nonce
+        let nonceData = Data(bytes: &nonceVar, count: MemoryLayout.size(ofValue: nonce))
+        var difficultyVar = difficulty
+        let difficultyData = Data(bytes: &difficultyVar, count: MemoryLayout.size(ofValue: difficulty))
+
+        let inputData = Data(timestamp.utf8) + Data(lastHash.utf8) + data + nonceData + difficultyData
         let hashed = SHA256.hash(data: inputData)
         let hashString = hashed.compactMap { String(format: "%02x", $0) }.joined()
         return hashString

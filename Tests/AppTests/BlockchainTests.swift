@@ -40,7 +40,7 @@ final class BlockchainTests: XCTestCase {
     }
 
     func testValidChainWithNoGenesisBlock() throws {
-        let block = Block(timestamp: "test", hash: "test", lastHash: "test", data: Data(), nonce: "", difficulty: 1)
+        let block = Block(timestamp: "test", hash: "test", lastHash: "test", data: Data(), nonce: 0, difficulty: 1)
         let blockchain = Blockchain(chain: [block])
         XCTAssertFalse(blockchain.validateChain())
     }
@@ -57,7 +57,7 @@ final class BlockchainTests: XCTestCase {
             assertionFailure()
             return
         }
-        let changedBlock = Block(timestamp: lastBlock.timestamp, hash: lastBlock.hash, lastHash: "broken", data: lastBlock.data, nonce: "", difficulty: 1)
+        let changedBlock = Block(timestamp: lastBlock.timestamp, hash: lastBlock.hash, lastHash: "broken", data: lastBlock.data, nonce: 0, difficulty: 1)
         // Change the block in the chain
         blockchain.chain[2] = changedBlock
         // Validate
@@ -75,7 +75,7 @@ final class BlockchainTests: XCTestCase {
             assertionFailure()
             return
         }
-        let changedBlock = Block(timestamp: lastBlock.timestamp, hash: lastBlock.hash, lastHash: lastBlock.lastHash, data: "broken".data(using: .utf8) ?? Data(), nonce: "", difficulty: 1)
+        let changedBlock = Block(timestamp: lastBlock.timestamp, hash: lastBlock.hash, lastHash: lastBlock.lastHash, data: "broken".data(using: .utf8) ?? Data(), nonce: 0, difficulty: 1)
         // Change the block in the chain
         blockchain.chain[2] = changedBlock
         // Validate
