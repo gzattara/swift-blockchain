@@ -10,21 +10,28 @@ import XCTVapor
 
 final class BlockchainTests: XCTestCase {
 
-    func testBlockchain() throws {
+    override func setUp() {
+        do {
+            try setupTests()
+        } catch {
+            assertionFailure()
+            return
+        }
+    }
+
+    func setupTests() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
         try configure(app)
+    }
 
+    func testBlockchain() {
         let blockchain = Blockchain()
         XCTAssertNotNil(blockchain)
         XCTAssertEqual(blockchain.chain[0].hash, "----")
     }
 
-    func testAddBlock() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try configure(app)
-
+    func testAddBlock() {
         var blockchain = Blockchain()
 
         let newData = "second block".data(using: .utf8)
@@ -33,20 +40,12 @@ final class BlockchainTests: XCTestCase {
     }
 
     func testValidChainWithNoGenesisBlock() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try configure(app)
-
-        let block = Block(timestamp: "test", hash: "test", lastHash: "test", data: Data())
+        let block = Block(timestamp: "test", hash: "test", lastHash: "test", data: Data(), nonce: "", difficulty: 1)
         let blockchain = Blockchain(chain: [block])
         XCTAssertFalse(blockchain.validateChain())
     }
 
-    func testLastHashReferenceChanged() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try configure(app)
-
+    func testLastHashReferenceChanged() {
         var blockchain = Blockchain()
         let newData = "second block".data(using: .utf8)
         blockchain.addBlock(data: newData ?? Data())
@@ -58,18 +57,14 @@ final class BlockchainTests: XCTestCase {
             assertionFailure()
             return
         }
-        let changedBlock = Block(timestamp: lastBlock.timestamp, hash: lastBlock.hash, lastHash: "broken", data: lastBlock.data)
+        let changedBlock = Block(timestamp: lastBlock.timestamp, hash: lastBlock.hash, lastHash: "broken", data: lastBlock.data, nonce: "", difficulty: 1)
         // Change the block in the chain
         blockchain.chain[2] = changedBlock
         // Validate
         XCTAssertFalse(blockchain.validateChain())
     }
 
-    func testBlockchainWithInvalidBlock() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try configure(app)
-
+    func testBlockchainWithInvalidBlock() {
         var blockchain = Blockchain()
         let newData = "second block".data(using: .utf8)
         blockchain.addBlock(data: newData ?? Data())
@@ -80,18 +75,14 @@ final class BlockchainTests: XCTestCase {
             assertionFailure()
             return
         }
-        let changedBlock = Block(timestamp: lastBlock.timestamp, hash: lastBlock.hash, lastHash: lastBlock.lastHash, data: "broken".data(using: .utf8) ?? Data())
+        let changedBlock = Block(timestamp: lastBlock.timestamp, hash: lastBlock.hash, lastHash: lastBlock.lastHash, data: "broken".data(using: .utf8) ?? Data(), nonce: "", difficulty: 1)
         // Change the block in the chain
         blockchain.chain[2] = changedBlock
         // Validate
         XCTAssertFalse(blockchain.validateChain())
     }
 
-    func testValidBlockchain() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try configure(app)
-
+    func testValidBlockchain() {
         var blockchain = Blockchain()
         let newData = "second block".data(using: .utf8)
         blockchain.addBlock(data: newData ?? Data())
@@ -99,4 +90,5 @@ final class BlockchainTests: XCTestCase {
         blockchain.addBlock(data: newData2 ?? Data())
         XCTAssertTrue(blockchain.validateChain())
     }
+
 }

@@ -24,6 +24,10 @@ struct Blockchain {
     }
 
     func validateChain() -> Bool {
+        validateChain(chain: self.chain)
+    }
+
+    private func validateChain(chain: [Block]) -> Bool {
         if chain[0] != Block.genesis() {
             return false
         }
@@ -34,9 +38,16 @@ struct Blockchain {
             // Check lastHash is correct
             if block.lastHash != previousHash { return false }
             // Check the block hash
-            if Block.generateHash(timestamp: block.timestamp, lastHash: block.lastHash, data: block.data) != block.hash { return false }
+            if Block.generateHash(timestamp: block.timestamp, lastHash: block.lastHash, data: block.data, nonce: block.nonce, difficulty: block.difficulty) != block.hash { return false }
             index += 1
         }
         return true
+    }
+
+    mutating func replaceChain(chain: [Block]) {
+        guard self.chain.count < chain.count, validateChain(chain: chain) else {
+            return
+        }
+        self.chain = chain
     }
 }
