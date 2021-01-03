@@ -26,9 +26,10 @@ final class BlockTests: XCTestCase {
     }
 
     func testBlock() {
-        let block = Block(timestamp: "test", hash: "hash", lastHash: "lasthash", data: Data(), nonce: 0, difficulty: 1)
+        let timestamp = Date().timeIntervalSince1970
+        let block = Block(timestamp: timestamp, hash: "hash", lastHash: "lasthash", data: Data(), nonce: 0, difficulty: 1)
         
-        XCTAssertEqual(block.timestamp, "test")
+        XCTAssertEqual(block.timestamp, timestamp)
         XCTAssertEqual(block.hash, "hash")
         XCTAssertEqual(block.difficulty, 1)
         XCTAssertEqual(block.nonce, 0)
@@ -46,8 +47,8 @@ final class BlockTests: XCTestCase {
     }
 
     func testHashGeneration() {
-        let hash = Block.generateHash(timestamp: "", lastHash: "test", data: Data(), nonce: 0, difficulty: 3)
-        XCTAssertEqual(hash, "87386d7d648dfbad544f3066446a091098d61d12760ef7787f41328abdc10709".lowercased())
+        let hash = Block.generateHash(timestamp: 100000.0, lastHash: "test", data: Data(), nonce: 0, difficulty: 3)
+        XCTAssertEqual(hash, "708cc61cbd5a8d2b05b69ce66a2379b26df2f5e4d367916f28b87a9e1ebfc0ee".lowercased())
     }
 
     func testMatchDifficultyCriteria() {
@@ -57,5 +58,20 @@ final class BlockTests: XCTestCase {
         let lastIndex = String.Index(utf16Offset: minedBlock.difficulty - 1, in: minedBlock.hash)
 
         XCTAssertEqual(String(minedBlock.hash[firstIndex...lastIndex]), String.init(repeating: "0", count: minedBlock.difficulty))
+    }
+
+    func testRaiseDifficultyForQuicklyMinedBlock() {
+        let lastBlock = Block.genesis()
+        let minedBlock = Block.mine(lastBlock: lastBlock, data: Data())
+        
+
+        XCTAssertEqual(minedBlock.adjustDifficulty(block: minedBlock, timestamp: minedBlock.timestamp + Constants.instance.mineRate - 100), minedBlock.difficulty + 1)
+    }
+
+    func testlowerDifficultyForSlowlyMinedBlock() {
+        let lastBlock = Block.genesis()
+        let minedBlock = Block.mine(lastBlock: lastBlock, data: Data())
+
+        XCTAssertEqual(minedBlock.adjustDifficulty(block: minedBlock, timestamp: minedBlock.timestamp + Constants.instance.mineRate + 100), minedBlock.difficulty - 1)
     }
 }

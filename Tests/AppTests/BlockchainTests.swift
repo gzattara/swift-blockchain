@@ -40,7 +40,7 @@ final class BlockchainTests: XCTestCase {
     }
 
     func testValidChainWithNoGenesisBlock() throws {
-        let block = Block(timestamp: "test", hash: "test", lastHash: "test", data: Data(), nonce: 0, difficulty: 1)
+        let block = Block(timestamp: Date().timeIntervalSince1970, hash: "test", lastHash: "test", data: Data(), nonce: 0, difficulty: 1)
         let blockchain = Blockchain(chain: [block])
         XCTAssertFalse(blockchain.validateChain())
     }

@@ -9,7 +9,7 @@ import Foundation
 import Crypto
 
 struct Block {
-    let timestamp: String
+    let timestamp: Double
     let hash: String
     let lastHash: String
     let data: Data
@@ -18,19 +18,23 @@ struct Block {
 
     // returns the first block for the blockchain
     static func genesis() -> Block {
-        return Block(timestamp: "dumy-timestamp", hash: "----", lastHash: "", data: Data(), nonce: 0, difficulty: 3)
+        return Constants.instance.genesisBlock
     }
 
     static func mine(lastBlock: Block, data: Data) -> Block {
         var hash: String = ""
-        var timestamp: String = ""
+        var timestamp: Double = 0.0
 
         var nonce = lastBlock.nonce
         var hashIsValid = false
 
         while !hashIsValid {
-            timestamp = String(Date().timeIntervalSince1970)
+            timestamp = Date().timeIntervalSince1970
             nonce += 1
+
+            var difficulty = lastBlock.difficulty
+
+//            if lastBlock
 
             hash = Block.generateHash(timestamp: timestamp, lastHash: lastBlock.hash, data: data, nonce: nonce, difficulty: lastBlock.difficulty)
             let firstIndex = String.Index(utf16Offset: 0, in: hash)
@@ -42,16 +46,25 @@ struct Block {
         return Block(timestamp: timestamp, hash: hash, lastHash: lastBlock.hash, data: data, nonce: nonce, difficulty: lastBlock.difficulty)
     }
 
-    static func generateHash(timestamp: String, lastHash: String, data: Data, nonce: Int, difficulty: Int) -> String {
+    static func generateHash(timestamp: Double, lastHash: String, data: Data, nonce: Int, difficulty: Int) -> String {
+        let timestampData = withUnsafeBytes(of: timestamp) { Data($0) }
         var nonceVar = nonce
         let nonceData = Data(bytes: &nonceVar, count: MemoryLayout.size(ofValue: nonce))
         var difficultyVar = difficulty
         let difficultyData = Data(bytes: &difficultyVar, count: MemoryLayout.size(ofValue: difficulty))
 
-        let inputData = Data(timestamp.utf8) + Data(lastHash.utf8) + data + nonceData + difficultyData
+        let inputData = Data(timestampData) + Data(lastHash.utf8) + data + nonceData + difficultyData
         let hashed = SHA256.hash(data: inputData)
         let hashString = hashed.compactMap { String(format: "%02x", $0) }.joined()
         return hashString
+    }
+
+    func adjustDifficulty(block: Block, timestamp: Double) -> Int {
+        if Date.init(timeIntervalSince1970: TimeInterval(block.timestamp)).timeIntervalSince1970 + TimeInterval(Constants.instance.mineRate) > timestamp {
+            return block.difficulty + 1
+        } else {
+            return block.difficulty - 1
+        }
     }
 }
 
