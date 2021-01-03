@@ -25,25 +25,24 @@ struct Block {
         var hash: String = ""
         var timestamp: Double = 0.0
 
-        var nonce = lastBlock.nonce
+        var nonce = 0
+        var difficulty = lastBlock.difficulty
         var hashIsValid = false
 
         while !hashIsValid {
             timestamp = Date().timeIntervalSince1970
             nonce += 1
 
-            var difficulty = lastBlock.difficulty
+            difficulty = adjustDifficulty(block: lastBlock, timestamp: timestamp)
 
-//            if lastBlock
-
-            hash = Block.generateHash(timestamp: timestamp, lastHash: lastBlock.hash, data: data, nonce: nonce, difficulty: lastBlock.difficulty)
+            hash = Block.generateHash(timestamp: timestamp, lastHash: lastBlock.hash, data: data, nonce: nonce, difficulty: difficulty)
             let firstIndex = String.Index(utf16Offset: 0, in: hash)
-            let lastIndex = String.Index(utf16Offset: lastBlock.difficulty - 1, in: hash)
-            if String(hash[firstIndex...lastIndex]) == String.init(repeating: "0", count: lastBlock.difficulty) {
+            let lastIndex = String.Index(utf16Offset: difficulty - 1, in: hash)
+            if String(hash[firstIndex...lastIndex]) == String.init(repeating: "0", count: difficulty) {
                 hashIsValid = true
             }
         }
-        return Block(timestamp: timestamp, hash: hash, lastHash: lastBlock.hash, data: data, nonce: nonce, difficulty: lastBlock.difficulty)
+        return Block(timestamp: timestamp, hash: hash, lastHash: lastBlock.hash, data: data, nonce: nonce, difficulty: difficulty)
     }
 
     static func generateHash(timestamp: Double, lastHash: String, data: Data, nonce: Int, difficulty: Int) -> String {
@@ -59,12 +58,19 @@ struct Block {
         return hashString
     }
 
-    func adjustDifficulty(block: Block, timestamp: Double) -> Int {
+    static func adjustDifficulty(block: Block, timestamp: Double) -> Int {
         if Date.init(timeIntervalSince1970: TimeInterval(block.timestamp)).timeIntervalSince1970 + TimeInterval(Constants.instance.mineRate) > timestamp {
-            return block.difficulty + 1
+            return checkDifficultyLowerValue(difficulty: block.difficulty + 1)
         } else {
-            return block.difficulty - 1
+            return checkDifficultyLowerValue(difficulty: block.difficulty - 1)
         }
+    }
+
+    static private func checkDifficultyLowerValue(difficulty: Int) -> Int {
+        if difficulty < 1 {
+            return 1
+        }
+        return difficulty
     }
 }
 

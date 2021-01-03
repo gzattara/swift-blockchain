@@ -12,7 +12,7 @@ class Constants {
 
     private init() {}
 
-    let genesisBlock = Block(timestamp: Date().timeIntervalSince1970, hash: "----", lastHash: "", data: Data(), nonce: 0, difficulty: 3)
+    let genesisBlock = Block(timestamp: Date().timeIntervalSince1970, hash: "----", lastHash: "", data: Data(), nonce: 0, difficulty: 2)
 
     let mineRate: Double = 10000
 }

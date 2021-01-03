@@ -65,13 +65,27 @@ final class BlockTests: XCTestCase {
         let minedBlock = Block.mine(lastBlock: lastBlock, data: Data())
         
 
-        XCTAssertEqual(minedBlock.adjustDifficulty(block: minedBlock, timestamp: minedBlock.timestamp + Constants.instance.mineRate - 100), minedBlock.difficulty + 1)
+        XCTAssertEqual(Block.adjustDifficulty(block: minedBlock, timestamp: minedBlock.timestamp + Constants.instance.mineRate - 100), minedBlock.difficulty + 1)
     }
 
     func testlowerDifficultyForSlowlyMinedBlock() {
         let lastBlock = Block.genesis()
         let minedBlock = Block.mine(lastBlock: lastBlock, data: Data())
 
-        XCTAssertEqual(minedBlock.adjustDifficulty(block: minedBlock, timestamp: minedBlock.timestamp + Constants.instance.mineRate + 100), minedBlock.difficulty - 1)
+        XCTAssertEqual(Block.adjustDifficulty(block: minedBlock, timestamp: minedBlock.timestamp + Constants.instance.mineRate + 100), minedBlock.difficulty - 1)
+    }
+
+    func testDifficultyIsAdjusted() {
+        let lastBlock = Block.genesis()
+        let minedBlock = Block.mine(lastBlock: lastBlock, data: Data())
+
+        XCTAssertNotEqual(lastBlock.difficulty, minedBlock.difficulty)
+        XCTAssertTrue(minedBlock.difficulty - 1 == lastBlock.difficulty || minedBlock.difficulty + 1 == lastBlock.difficulty)
+    }
+
+    func testDifficultyIsNeverLowerTo1() {
+        let block = Block(timestamp: 1000, hash: "----", lastHash: "------", data: Data(), nonce: 0, difficulty: -1)
+
+        XCTAssertEqual(Block.adjustDifficulty(block: block, timestamp: Date().timeIntervalSince1970), 1)
     }
 }
