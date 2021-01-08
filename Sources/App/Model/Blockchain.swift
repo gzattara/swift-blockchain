@@ -35,8 +35,12 @@ struct Blockchain {
         var index = 0
         for block in chain.dropFirst() {
             let previousHash = chain[index].hash
+            let previousDifficulty = chain[index].difficulty
             // Check lastHash is correct
             if block.lastHash != previousHash { return false }
+            // Check last difficulty yo prevent difficulty jumps
+            let difficultyJump: Int = abs(block.difficulty - previousDifficulty)
+            if difficultyJump > 1 { return false }
             // Check the block hash
             if Block.generateHash(timestamp: block.timestamp, lastHash: block.lastHash, data: block.data, nonce: block.nonce, difficulty: block.difficulty) != block.hash { return false }
             index += 1

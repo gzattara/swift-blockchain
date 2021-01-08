@@ -45,6 +45,20 @@ final class BlockchainTests: XCTestCase {
         XCTAssertFalse(blockchain.validateChain())
     }
 
+    func testValidChainWithHighDificultyJump() throws {
+        let firstBlock = Block(timestamp: Date().timeIntervalSince1970, hash: "test", lastHash: "test", data: Data(), nonce: 0, difficulty: 1)
+        let block = Block(timestamp: Date().timeIntervalSince1970, hash: "test", lastHash: "test", data: Data(), nonce: 0, difficulty: 7)
+        let blockchain = Blockchain(chain: [firstBlock, block])
+        XCTAssertFalse(blockchain.validateChain())
+    }
+
+    func testValidChainWithHighnegativeDificultyJump() throws {
+        let firstBlock = Block(timestamp: Date().timeIntervalSince1970, hash: "test", lastHash: "test", data: Data(), nonce: 0, difficulty: 5)
+        let block = Block(timestamp: Date().timeIntervalSince1970, hash: "test", lastHash: "test", data: Data(), nonce: 0, difficulty: 3)
+        let blockchain = Blockchain(chain: [firstBlock, block])
+        XCTAssertFalse(blockchain.validateChain())
+    }
+
     func testLastHashReferenceChanged() {
         var blockchain = Blockchain()
         let newData = "second block".data(using: .utf8)
